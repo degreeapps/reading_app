@@ -1,0 +1,196 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Reglas para perfiles de usuario
+    match /user_profiles/{userId} {
+      // Permitir lectura y escritura solo al propietario del perfil
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Reglas para libros (si los almacenamos en el futuro)
+    match /books/{bookId} {
+      // Permitir lectura a todos los usuarios autenticados
+      allow read: if request.auth != null;
+      // Permitir escritura solo a administradores (para futuras funcionalidades)
+      allow create, update, delete: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
+    
+    // Reglas para grupos de lectura (futuras funcionalidades)
+    match /reading_groups/{groupId} {
+      // Permitir lectura a miembros del grupo
+      allow read: if request.auth != null;
+      // Permitir escritura a creadores del grupo
+      allow write: if request.auth != null;
+    }
+    
+    // Reglas para comentarios de libros (futuras funcionalidades)
+    match /book_comments/{commentId} {
+      // Permitir lectura a todos los usuarios autenticados
+      allow read: if request.auth != null;
+      // Permitir escritura al autor del comentario
+      allow create: if request.auth != null && request.auth.uid == resource.data.authorId;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.authorId;
+    }
+    
+    // Reglas para fichas de libros
+    match /book_fichas/{fichaId} {
+      // Permitir lectura a todos los usuarios autenticados
+      allow read: if request.auth != null;
+      // Permitir escritura solo al propietario de la ficha
+      allow create, update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    // Permite leer cualquier user_profile solo a usuarios autenticados
+    match /user_profiles/{userId} {
+      allow read: if request.auth != null;
+      // Ajusta el write/update si es necesario
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Funciones auxiliares
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isInvolved(friendRequest) {
+      return isAuthenticated() && (
+        friendRequest.fromUserId == request.auth.uid ||
+        friendRequest.toUserId == request.auth.uid
+      );
+    }
+
+    // Perfiles de usuario
+    match /user_profiles/{userId} {
+      allow read: if isAuthenticated();
+      // Permitir actualizar el perfil propio O cuando se es parte de una invitación de amistad
+      allow update: if isAuthenticated() && (
+        isOwner(userId) ||
+        // Permitir actualizar friendIds cuando se es parte de una invitación
+        (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['friendIds']) &&
+          (
+            request.resource.data.friendIds.hasAll(resource.data.friendIds || []) ||
+            resource.data.friendIds.hasAll(request.resource.data.friendIds || [])
+          )
+        )
+      );
+      allow create: if isOwner(userId);
+    }
+
+    // Invitaciones de amistad
+    match /friend_requests/{requestId} {
+      allow read: if isAuthenticated() && (
+        resource.data.fromUserId == request.auth.uid ||
+        resource.data.toUserId == request.auth.uid
+      );
+
+      allow create: if isAuthenticated() && 
+        request.resource.data.fromUserId == request.auth.uid &&
+        request.resource.data.status == 'pending';
+
+      // Permitir actualizar el estado si eres el destinatario
+      allow update: if isAuthenticated() && 
+        resource.data.toUserId == request.auth.uid &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'respondedAt']) &&
+        (request.resource.data.status == 'accepted' || request.resource.data.status == 'rejected');
+
+      allow delete: if isAuthenticated() && isInvolved(resource.data);
+    }
+  }
+}
+
+
+
+  	// Funciones auxiliares
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    // Reglas para perfiles de usuario
+    match /user_profiles/{userId} {
+      // Permitir lectura y escritura solo al propietario del perfil
+      allow read, write: if isOwner(userId);
+    }
+    
+    // Reglas para libros (si los almacenamos en el futuro)
+    match /books/{bookId} {
+      // Permitir lectura a todos los usuarios autenticados
+      allow read: if isAuthenticated();
+      // Permitir creación solo al propietario
+      allow create: if isOwner(request.resource.data.userId);
+      // Permitir actualización y borrado solo al propietario actual
+      allow update, delete: if isOwner(resource.data.userId);
+    }
+    
+    // Reglas para grupos de lectura (futuras funcionalidades)
+    match /reading_groups/{groupId} {
+      // Permitir lectura a miembros del grupo
+      allow read: if isAuthenticated();
+      // Permitir escritura a creadores del grupo
+      allow write: if isAuthenticated();
+    }
+    
+    // Reglas para comentarios de libros (futuras funcionalidades)
+    match /book_comments/{commentId} {
+      // Permitir lectura a todos los usuarios autenticados
+      allow read: if isAuthenticated();
+      // Permitir creación solo al autor
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.authorId;
+      // Permitir actualización y borrado solo al autor actual
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.authorId;
+    }
+    
+    // Reglas para fichas de libros
+    match /book_fichas/{fichaId} {
+      // Permitir lectura a todos los usuarios autenticados
+      allow read: if isAuthenticated();
+      // Permitir creación solo al propietario
+      allow create: if isOwner(request.resource.data.userId);
+      // Permitir actualización y borrado solo al propietario actual
+      allow update, delete: if isOwner(resource.data.userId);
+    }
+    
+    // Permite leer cualquier user_profile solo a usuarios autenticados
+    match /user_profiles/{userId} {
+      allow read: if isAuthenticated();
+      // Ajusta el write/update si es necesario
+      allow write: if isOwner(userId);
+    }
+
+    function isInvolved(friendRequest) {
+      return isAuthenticated() && (
+        friendRequest.fromUserId == request.auth.uid ||
+        friendRequest.toUserId == request.auth.uid
+      );
+    }
+
+    // Perfiles de usuario
+    match /user_profiles/{userId} {
+      allow read: if isAuthenticated();
+      // Permitir actualizar el perfil propio O cuando se es parte de una invitación de amistad
+      allow update: if isAuthenticated() && (
+        isOwner(userId) ||
+        // Permitir actualizar friendIds cuando se es parte de una invitación
+        (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['friendIds']) &&
+          (
+            request.resource.data.friendIds.hasAll(resource.data.friendIds || []) ||
+            resource.data.friendIds.hasAll(request.resource.data.friendIds || [])
+          )
+        )
+      );
+      allow create: if isOwner(userId);
+    }
+    
+    match /friend_requests/{requestId} {
+      // Cualquier usuario autenticado puede leer y escribir invitaciones
+      // Esto es temporal para debugging, luego lo haremos más restrictivo
+      allow read, write: if isAuthenticated();
+    }
