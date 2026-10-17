@@ -133,6 +133,13 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Secrets / local config (do not commit)
+env.json
+.env
+android/app/google-services.json
+lib/firebase_options.dart
+ios/Runner/GoogleService-Info.plist
+
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3
 !**/ios/**/default.mode2v3
