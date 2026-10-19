@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:reading_app/core/animations/page_transitions.dart';
 import 'package:reading_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:reading_app/features/profile/presentation/bloc/profile_bloc.dart';
@@ -27,10 +28,12 @@ class _ProfilePageState extends State<ProfilePage> {
   int _friendsCount = 0;
   int _pendingRequestsCount = 0;
   String? _currentUserId;
+  String? _appVersion;
 
   @override
   void initState() {
     super.initState();
+    _loadAppVersion();
     // Load profile when page is opened
     final authState = context.read<AuthBloc>().state;
     authState.when(
@@ -45,6 +48,18 @@ class _ProfilePageState extends State<ProfilePage> {
       unauthenticated: () {},
       error: (message) {},
     );
+  }
+
+  Future<void> _loadAppVersion() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      if (!mounted) return;
+      setState(() {
+        _appVersion = '${info.version} (${info.buildNumber})';
+      });
+    } catch (_) {
+      // Silently fail
+    }
   }
 
   Future<void> _loadFriendsCount() async {
@@ -357,6 +372,16 @@ class _ProfilePageState extends State<ProfilePage> {
                               },
                             ),
                           ),
+                          if (_appVersion != null) ...[
+                            const SizedBox(height: 24),
+                            Center(
+                              child: Text(
+                                'Versión $_appVersion',
+                                style: Theme.of(context).textTheme.bodySmall,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
