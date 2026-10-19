@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:reading_app/core/widgets/app_version_label.dart';
 import 'package:reading_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:reading_app/features/auth/presentation/widgets/auth_form.dart';
 import 'package:reading_app/features/auth/presentation/widgets/google_sign_in_button.dart';
@@ -65,6 +66,8 @@ class RegisterPage extends StatelessWidget {
                     ),
                   ],
                 ),
+                const SizedBox(height: 24),
+                const AppVersionLabel(),
               ],
             ),
           ),
