@@ -4,7 +4,7 @@ import 'package:reading_app/features/books/domain/entities/book.dart';
 
 class GoogleBooksApi {
   static const String _baseUrl = 'https://www.googleapis.com/books/v1/volumes';
-  static const String _apiKey = 'AIzaSyCSaXqfXhOQ2V-R2H0RK5zyMiOVfZKd2rU';
+  static const String _apiKey = String.fromEnvironment('GOOGLE_BOOKS_API_KEY');
 
   Future<List<Book>> searchBooks(String query) async {
     try {

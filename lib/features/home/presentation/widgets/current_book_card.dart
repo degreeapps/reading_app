@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:reading_app/features/profile/domain/entities/user_profile.dart';
 import 'package:reading_app/features/books/domain/entities/book.dart';
+import 'package:reading_app/core/config/injection.dart';
 import 'package:reading_app/features/books/data/datasources/google_books_api.dart';
 import 'package:reading_app/features/books/presentation/pages/book_detail_page.dart';
 import 'package:reading_app/features/profile/presentation/bloc/profile_bloc.dart';
@@ -140,7 +141,7 @@ class CurrentBookCard extends StatelessWidget {
 
   Future<Book?> _loadBookDetails(String bookId) async {
     try {
-      final api = GoogleBooksApi();
+      final api = getIt<GoogleBooksApi>();
       return await api.getBookById(bookId);
     } catch (e) {
       return null;

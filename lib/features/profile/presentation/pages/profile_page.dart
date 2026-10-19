@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:reading_app/core/animations/page_transitions.dart';
+import 'package:reading_app/core/widgets/app_version_label.dart';
 import 'package:reading_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:reading_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:reading_app/features/profile/presentation/bloc/profile_event.dart';
@@ -357,6 +358,8 @@ class _ProfilePageState extends State<ProfilePage> {
                               },
                             ),
                           ),
+                          const SizedBox(height: 24),
+                          const Center(child: AppVersionLabel()),
                         ],
                       ),
                     ),

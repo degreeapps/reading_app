@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:reading_app/features/books/domain/entities/book.dart';
 import 'package:reading_app/features/books/presentation/pages/book_detail_page.dart';
+import 'package:reading_app/core/config/injection.dart';
 import 'package:reading_app/features/books/data/datasources/google_books_api.dart';
 import 'package:reading_app/core/animations/widget_animations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -271,8 +272,7 @@ class FavoritesPreviewCard extends StatelessWidget {
 
   Future<Book> _loadBookDetails(String bookId) async {
     try {
-      // Usar la API real de Google Books
-      final api = GoogleBooksApi();
+      final api = getIt<GoogleBooksApi>();
       final book = await api.getBookById(bookId);
 
       if (book != null) {

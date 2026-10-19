@@ -1,4 +1,4 @@
-package com.readingapp.reading_app
+package com.degreeapps.lectometro
 
 import io.flutter.embedding.android.FlutterActivity
 
