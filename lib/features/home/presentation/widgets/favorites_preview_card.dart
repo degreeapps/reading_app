@@ -37,19 +37,25 @@ class FavoritesPreviewCard extends StatelessWidget {
               children: [
                 Icon(Icons.favorite, color: Colors.pink[700], size: 24),
                 const SizedBox(width: 8),
-                Text(
-                  'Mis Libros Favoritos',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.pink[700],
+                Expanded(
+                  child: Text(
+                    'Mis Libros Favoritos',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.pink[700],
+                    ),
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 Text(
                   '${bookIds.length} libros',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
+                  ),
                 ),
               ],
             ),

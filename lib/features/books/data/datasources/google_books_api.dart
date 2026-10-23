@@ -1,4 +1,6 @@
 import 'dart:convert';
+
+import 'package:google_api_headers/google_api_headers.dart';
 import 'package:http/http.dart' as http;
 import 'package:reading_app/features/books/domain/entities/book.dart';
 
@@ -6,10 +8,17 @@ class GoogleBooksApi {
   static const String _baseUrl = 'https://www.googleapis.com/books/v1/volumes';
   static const String _apiKey = String.fromEnvironment('GOOGLE_BOOKS_API_KEY');
 
+  Future<Map<String, String>> _androidApiHeaders() async {
+    // Required when the API key is restricted to an Android app (package + SHA-1).
+    // Plain http calls otherwise look like application "<empty>" and get 403.
+    return GoogleApiHeaders().getHeaders();
+  }
+
   Future<List<Book>> searchBooks(String query) async {
     try {
+      final headers = await _androidApiHeaders();
       final url = Uri.parse('$_baseUrl?q=$query&key=$_apiKey&maxResults=20');
-      final response = await http.get(url);
+      final response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -26,8 +35,9 @@ class GoogleBooksApi {
 
   Future<Book?> getBookById(String id) async {
     try {
+      final headers = await _androidApiHeaders();
       final url = Uri.parse('$_baseUrl/$id?key=$_apiKey');
-      final response = await http.get(url);
+      final response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
